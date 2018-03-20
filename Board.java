@@ -69,12 +69,14 @@ public class Board {
 	}
 
 	public void computerTurn() {
-		if(isComputerTurn()) {
-			alphabeta();
-			play(aiCoord[0], aiCoord[1]);
-			System.out.println(curPlayer.getColorString()+" ("+aiCoord[0]+"; "+aiCoord[1]+")"+"\t move uses card "+aiCard);
-			swapCard(aiCard);
+		if(isComputerTurn()  == false) {
+			return;
 		}
+
+		alphabeta();
+		play(aiCoord[0], aiCoord[1]);
+		System.out.println(curPlayer.getColorString()+" ("+aiCoord[0]+"; "+aiCoord[1]+")"+"\t move uses card "+aiCard);
+		swapCard(aiCard);
 	}
 
 	private void alphabeta() {
@@ -89,7 +91,6 @@ public class Board {
 		aiOffPlayer.setBoard(temp);
 
 		System.out.println("Selected move score: "+alphabeta(this, aiCurPlayer.getDifficulty(), Integer.MIN_VALUE, Integer.MAX_VALUE, true));
-
 	}
 
 	public Piece getKingOfColor(int color) {
@@ -108,12 +109,12 @@ public class Board {
 	}
 
 	private int alphabeta(Board node, int depth, int alpha, int beta, boolean maximize) {
-		if(node.checkWin()) {
-			if(node.getWinner().getColor() == aiCurPlayer.getColor()) {
-				return 100+depth;
-			} else {
-				return -(100+depth);
-			}
+		if(node.checkWin() == true && node.getWinner().getColor() == aiCurPlayer.getColor()) {
+			return +(100+depth);
+		} 
+
+		if(node.checkWin() == true && node.getWinner().getColor() != aiCurPlayer.getColor()) {
+			return -(100+depth);
 		}
 
 		if(depth <= 0) {
@@ -129,7 +130,7 @@ public class Board {
 			return (curCount-curCloseness)-(offCount-offCloseness);
 		}
 
-		if(maximize) {
+		if(maximize == true) {
 			int v =  Integer.MIN_VALUE;
 			for(Card c : node.getCardsOfPlayerColor(aiCurPlayer.getColor())) {
 				for(Piece p: node.getPiecesOfColor(aiCurPlayer.getColor())) {
@@ -137,7 +138,7 @@ public class Board {
 
 					for(int [] move : c.getMoves()) {
 						Board child = new Board(node);
-
+						
 						Coordinate from = new Coordinate(p.getCoord());
 						Coordinate to   = new Coordinate(from);
 
@@ -168,7 +169,9 @@ public class Board {
 				}
 			}
 			return v;
-		} else {
+		} 
+		
+		if(maximize == false) {
 			int v =  Integer.MAX_VALUE;
 			for(Card c : node.getCardsOfPlayerColor(aiOffPlayer.getColor())) {
 				if(c==null) continue;
@@ -182,7 +185,6 @@ public class Board {
 
 						Coordinate from = new Coordinate(p.getCoord());
 						Coordinate to   = new Coordinate(from);
-
 
 						if(!to.move(move, aiOffPlayer.getColor()) || from.equals(to)) continue;
 						if(child.getPiece(from) == null) continue;
@@ -255,7 +257,6 @@ public class Board {
 	}
 
 	public boolean checkWin() {
-
 		Piece p = getPiece(Coordinate.redEnd);
 
 		if(p != null && p.isKing() && p.getColor() == blue)
